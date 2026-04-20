@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::auth;
+use crate::constant;
 use crate::error::AuthError;
 use std::ffi::{CStr, CString, c_char};
 use std::sync::Mutex;
@@ -48,6 +49,23 @@ pub extern "C" fn BA_Refresh() -> bool {
         set_error(e);
         false
     })
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn BA_Constant(key: *const c_char) -> *const c_char {
+    if key.is_null() {
+        set_error(AuthError::InvalidKey); // TODO: Replace with a new error type
+        return std::ptr::null();
+    }
+
+    let key = unsafe { CStr::from_ptr(key) }.to_string_lossy();
+
+    constant::constant(&key).map(|v| CString::new(v).map(|s| s.into_raw() as *const _).unwrap_or(std::ptr::null())).unwrap_or_else(
+        |e| {
+            set_error(e);
+            std::ptr::null()
+        }
+    )
 }
 
 #[unsafe(no_mangle)]

@@ -11,6 +11,7 @@ pub enum AuthError {
     InvalidResponse,
     InvalidSignature,
     KeyExpired,
+    NotAuthenticated,
     ServiceUnavailable,
     TimestampExpired,
     Uninitialized
@@ -27,6 +28,7 @@ impl core::fmt::Display for AuthError {
             AuthError::InvalidResponse => write!(f, "Invalid response from server"),
             AuthError::InvalidSignature => write!(f, "Invalid signature"),
             AuthError::KeyExpired => write!(f, "Key expired"),
+            AuthError::NotAuthenticated => write!(f, "Not authenticated"),
             AuthError::ServiceUnavailable => write!(f, "Service unavailable"),
             AuthError::TimestampExpired => write!(f, "Timestamp expired"),
             AuthError::Uninitialized => write!(f, "SDK not initialized")

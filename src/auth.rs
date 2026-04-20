@@ -67,15 +67,8 @@ pub fn refresh() -> Result<(), AuthError> {
         return Err(AuthError::Uninitialized);
     }
 
-    let token = TOKEN.lock().unwrap().clone().ok_or(AuthError::Uninitialized)?;
-
-    let response = http::request::<AuthResponse>(
-        "POST",
-        crate::REFRESH_URL,
-        &[("X-Session-Token", &token)],
-        None,
-        None
-    )?;
+    let token = TOKEN.lock().unwrap().clone().ok_or(AuthError::NotAuthenticated)?;
+    let response = http::request::<AuthResponse>("POST", crate::REFRESH_URL, &[("X-Session-Token", &token)], None, None)?;
 
     let token = response.token.ok_or(AuthError::InvalidResponse)?;
     let expires_at = response.expires_at.ok_or(AuthError::InvalidResponse)?;

@@ -3,6 +3,7 @@
 
 mod auth;
 mod error;
+mod ffi;
 mod http;
 mod hwid;
 mod state;

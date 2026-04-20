@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 BasedAuth
+# SPDX-License-Identifier: Apache-2.0
+
+version = 1
+SPDX-PackageName = "BasedAuth SDK"
+SPDX-PackageDownloadLocation = "https://github.com/basedauth/sdk"
+
+[[annotations]]
+path = ["Cargo.lock", "renovate.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 BasedAuth"
+SPDX-License-Identifier = "Apache-2.0"

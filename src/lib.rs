@@ -9,3 +9,4 @@ mod hwid;
 mod state;
 
 const AUTH_URL: &str = "https://basedauth.com/api/sdk/authenticate";
+const REFRESH_URL: &str = "https://basedauth.com/api/sdk/refresh";

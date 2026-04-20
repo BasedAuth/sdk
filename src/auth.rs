@@ -59,6 +59,33 @@ pub fn authenticate(license_key: &str) -> Result<(), AuthError> {
     *TOKEN.lock().unwrap() = Some(token);
     *EXPIRES_AT.lock().unwrap() = Some(expires_at);
 
-    // TODO: Start refresh thread
+    Ok(())
+}
+
+pub fn refresh() -> Result<(), AuthError> {
+    if PUBLIC_KEY.get().is_none() {
+        return Err(AuthError::Uninitialized);
+    }
+
+    let token = TOKEN.lock().unwrap().clone().ok_or(AuthError::Uninitialized)?;
+
+    let response = http::request::<AuthResponse>(
+        "POST",
+        crate::REFRESH_URL,
+        &[("X-Session-Token", &token)],
+        None,
+        None
+    )?;
+
+    let token = response.token.ok_or(AuthError::InvalidResponse)?;
+    let expires_at = response.expires_at.ok_or(AuthError::InvalidResponse)?;
+
+    if token.len() != 64 || hex::decode(&token).is_err() {
+        return Err(AuthError::InvalidResponse);
+    }
+
+    *TOKEN.lock().unwrap() = Some(token);
+    *EXPIRES_AT.lock().unwrap() = Some(expires_at);
+
     Ok(())
 }

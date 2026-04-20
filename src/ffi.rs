@@ -43,6 +43,14 @@ pub extern "C" fn BA_Authenticate(license_key: *const c_char) -> bool {
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn BA_Refresh() -> bool {
+    auth::refresh().map(|_| true).unwrap_or_else(|e| {
+        set_error(e);
+        false
+    })
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn BA_GetError() -> *const c_char {
     LAST_ERROR
         .lock()

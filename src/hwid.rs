@@ -49,8 +49,23 @@ fn collect_gpu() -> Vec<u8> {
 }
 
 #[cfg(windows)]
-fn collect_gpu() -> Vec<v8> {
-    todo!("Support GPU collection on Windows")
+fn collect_gpu() -> Vec<u8> {
+    use windows::Win32::Graphics::Dxgi::*;
+
+    let mut entries: Vec<String> = Vec::new();
+
+    unsafe {
+        let factory: IDXGIFactory = CreateDXGIFactory().unwrap();
+        let mut i = 0;
+        while let Ok(adapter) = factory.EnumAdapters(i) {
+            let desc = adapter.GetDesc().unwrap();
+            entries.push(format!("{:#06x}|{:#06x}", desc.VendorId, desc.DeviceId));
+            i += 1;
+        }
+    }
+
+    entries.sort_unstable();
+    entries.join("\n").into_bytes()
 }
 
 pub(crate) fn get_hwid() -> String {

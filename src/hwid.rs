@@ -28,8 +28,34 @@ fn collect_cpuid() -> Vec<u8> {
     buf
 }
 
+#[cfg(unix)]
+fn collect_gpu() -> Vec<u8> {
+    let mut entries: Vec<String> = Vec::new();
+
+    if let Ok(dir) = std::fs::read_dir("/sys/bus/pci/devices") {
+        for entry in dir.flatten() {
+            let path = entry.path();
+
+            let read = |attr: &str| std::fs::read_to_string(path.join(attr)).unwrap_or_default().trim().to_owned();
+
+            if read("class").starts_with("0x03") { // Display Controller
+                entries.push(format!("{}|{}", read("vendor"), read("device")));
+            }
+        }
+    }
+
+    entries.sort_unstable();
+    entries.join("\n").into_bytes()
+}
+
+#[cfg(windows)]
+fn collect_gpu() -> Vec<v8> {
+    todo!("Support GPU collection on Windows")
+}
+
 pub(crate) fn get_hwid() -> String {
     let mut hasher = blake3::Hasher::new();
     hasher.update(&collect_cpuid());
-    hasher.finalize().to_hex().to_string() // TODO: Add hard drives and PCiE devices
+    hasher.update(&collect_gpu());
+    hasher.finalize().to_hex().to_string() // TODO: Add hard drives
 }

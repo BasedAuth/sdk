@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [package]
-name = "basedauth-sdk"
-version = "0.1.0"
+name = "basedauth"
+version = "1.0.0"
 authors = ["cadavricator"]
 description = "Official SDK for the BasedAuth authentication service."
 edition = "2024"

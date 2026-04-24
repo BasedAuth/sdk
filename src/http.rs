@@ -55,7 +55,7 @@ pub(crate) fn request<T: DeserializeOwned>(
     signed_message.verify(&public_key).map_err(|_| AuthError::InvalidSignature)?;
 
     let ts = timestamp.parse::<i64>().map_err(|_| AuthError::InvalidSignature)?;
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs().cast_signed();
 
     if (now - ts).abs() > 15 {
         return Err(AuthError::TimestampExpired);

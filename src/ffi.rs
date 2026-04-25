@@ -87,3 +87,10 @@ pub extern "C" fn BA_GetError() -> *const c_char {
         .and_then(|msg| CString::new(msg).ok())
         .map_or(std::ptr::null(), |s| s.into_raw().cast_const())
 }
+
+#[unsafe(no_mangle)]
+pub extern "C" fn BA_Free(ptr: *mut c_char) {
+    if !ptr.is_null() {
+        unsafe { drop(CString::from_raw(ptr)) };
+    }
+}

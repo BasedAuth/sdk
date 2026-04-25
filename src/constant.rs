@@ -16,9 +16,10 @@ pub fn constant(key: &str) -> Result<String, AuthError> {
         return Err(AuthError::Uninitialized);
     }
 
-    let token = TOKEN.lock().unwrap().clone().ok_or(AuthError::NotAuthenticated)?;
-    let response =
-        http::request::<ConstantResponse>("GET", crate::CONSTANT_URL, &[("X-Session-Token", &token)], None, Some(&[("key", key)]))?;
+    if TOKEN.lock().unwrap().is_none() {
+        return Err(AuthError::NotAuthenticated);
+    }
 
+    let response = http::request::<ConstantResponse>("GET", crate::CONSTANT_URL, None, Some(&[("key", key)]))?;
     response.value.ok_or(AuthError::InvalidResponse)
 }

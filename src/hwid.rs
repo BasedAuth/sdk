@@ -34,7 +34,8 @@ fn collect_gpu() -> Vec<u8> {
 
             let read = |attr: &str| std::fs::read_to_string(path.join(attr)).unwrap_or_default().trim().to_owned();
 
-            if read("class").starts_with("0x03") { // Display Controller
+            if read("class").starts_with("0x03") {
+                // Display Controller
                 entries.push(format!("{}|{}", read("vendor"), read("device")));
             }
         }

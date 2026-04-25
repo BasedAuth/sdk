@@ -3,7 +3,6 @@
 
 use crate::error::AuthError;
 use crate::http;
-use crate::hwid;
 use crate::state::{EXPIRES_AT, PUBLIC_KEY, TOKEN};
 use serde::Deserialize;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -26,13 +25,8 @@ pub fn authenticate(license_key: &str) -> Result<(), AuthError> {
         return Err(AuthError::Uninitialized);
     }
 
-    let response = http::request::<AuthResponse>(
-        "POST",
-        crate::AUTH_URL,
-        &[("X-Hardware-ID", &hwid::get_hwid())],
-        Some(&serde_json::json!({ "license_key": license_key })),
-        None
-    )?;
+    let response =
+        http::request::<AuthResponse>("POST", crate::AUTH_URL, Some(&serde_json::json!({ "license_key": license_key })), None)?;
 
     if let Some(msg) = response.message {
         match msg.as_str() {
@@ -67,8 +61,11 @@ pub fn refresh() -> Result<(), AuthError> {
         return Err(AuthError::Uninitialized);
     }
 
-    let token = TOKEN.lock().unwrap().clone().ok_or(AuthError::NotAuthenticated)?;
-    let response = http::request::<AuthResponse>("POST", crate::REFRESH_URL, &[("X-Session-Token", &token)], None, None)?;
+    if TOKEN.lock().unwrap().is_none() {
+        return Err(AuthError::NotAuthenticated);
+    }
+
+    let response = http::request::<AuthResponse>("POST", crate::REFRESH_URL, None, None)?;
 
     let token = response.token.ok_or(AuthError::InvalidResponse)?;
     let expires_at = response.expires_at.ok_or(AuthError::InvalidResponse)?;

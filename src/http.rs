@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::error::AuthError;
-use crate::state::PUBLIC_KEY;
+use crate::hwid;
+use crate::state::{PUBLIC_KEY, TOKEN};
 use serde::de::DeserializeOwned;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub(crate) fn request<T: DeserializeOwned>(
-    method: &str, url: &str, headers: &[(&str, &str)], json: Option<&serde_json::Value>, query: Option<&[(&str, &str)]>
+    method: &str, url: &str, json: Option<&serde_json::Value>, query: Option<&[(&str, &str)]>
 ) -> Result<T, AuthError> {
     let public_key_hex = PUBLIC_KEY.get().ok_or(AuthError::Uninitialized)?;
     let client = reqwest::blocking::Client::new();
@@ -16,10 +17,11 @@ pub(crate) fn request<T: DeserializeOwned>(
         client.post(url)
     } else {
         client.get(url)
-    };
+    }
+    .header("X-Hardware-ID", hwid::get_hwid());
 
-    for (key, value) in headers {
-        req = req.header(*key, *value);
+    if let Some(token) = TOKEN.lock().unwrap().as_deref() {
+        req = req.header("X-Session-Token", token);
     }
 
     if let Some(json) = json {

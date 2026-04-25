@@ -22,10 +22,13 @@ pub extern "C" fn BA_Init(public_key_hex: *const c_char) -> bool {
 
     let key = unsafe { CStr::from_ptr(public_key_hex) }.to_string_lossy();
 
-    auth::init(&key).map_or_else(|e| {
-        set_error(&e);
-        false
-    }, |()| true)
+    auth::init(&key).map_or_else(
+        |e| {
+            set_error(&e);
+            false
+        },
+        |()| true
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -37,18 +40,24 @@ pub extern "C" fn BA_Authenticate(license_key: *const c_char) -> bool {
 
     let key = unsafe { CStr::from_ptr(license_key) }.to_string_lossy();
 
-    auth::authenticate(&key).map_or_else(|e| {
-        set_error(&e);
-        false
-    }, |()| true)
+    auth::authenticate(&key).map_or_else(
+        |e| {
+            set_error(&e);
+            false
+        },
+        |()| true
+    )
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn BA_Refresh() -> bool {
-    auth::refresh().map_or_else(|e| {
-        set_error(&e);
-        false
-    }, |()| true)
+    auth::refresh().map_or_else(
+        |e| {
+            set_error(&e);
+            false
+        },
+        |()| true
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -60,10 +69,13 @@ pub extern "C" fn BA_Constant(key: *const c_char) -> *const c_char {
 
     let key = unsafe { CStr::from_ptr(key) }.to_string_lossy();
 
-    constant::constant(&key).map_or_else(|e| {
-        set_error(&e);
-        std::ptr::null()
-    }, |v| CString::new(v).map_or(std::ptr::null(), |s| s.into_raw().cast_const()))
+    constant::constant(&key).map_or_else(
+        |e| {
+            set_error(&e);
+            std::ptr::null()
+        },
+        |v| CString::new(v).map_or(std::ptr::null(), |s| s.into_raw().cast_const())
+    )
 }
 
 #[unsafe(no_mangle)]

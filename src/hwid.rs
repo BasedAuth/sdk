@@ -8,10 +8,6 @@ fn collect_cpuid() -> Vec<u8> {
 
     let leaves: &[(u32, u32)] = &[
         (0x00000000, 0), // vendor string + max supported leaf
-        (0x00000001, 0), // family, model, stepping + feature flags
-        (0x00000004, 0), // cache topology: L1
-        (0x00000004, 1), // cache topology: L2
-        (0x00000004, 2), // cache topology: L3
         (0x80000002, 0), // brand string part 1
         (0x80000003, 0), // brand string part 2
         (0x80000004, 0)  // brand string part 3

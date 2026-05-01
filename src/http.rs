@@ -5,13 +5,22 @@ use crate::error::AuthError;
 use crate::hwid;
 use crate::state::{PUBLIC_KEY, TOKEN};
 use serde::de::DeserializeOwned;
+use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
+
+static CLIENT: OnceLock<reqwest::blocking::Client> = OnceLock::new();
 
 pub(crate) fn request<T: DeserializeOwned>(
     method: &str, url: &str, json: Option<&serde_json::Value>, query: Option<&[(&str, &str)]>
 ) -> Result<T, AuthError> {
     let public_key_hex = PUBLIC_KEY.get().ok_or(AuthError::Uninitialized)?;
-    let client = reqwest::blocking::Client::new();
+    let client = CLIENT.get_or_init(|| {
+        reqwest::blocking::Client::builder()
+            .timeout(std::time::Duration::from_secs(10))
+            .user_agent(concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION")))
+            .build()
+            .unwrap()
+    });
 
     let mut req = if method == "POST" {
         client.post(url)
